@@ -15,6 +15,8 @@ const SignUpFom = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(userDetails);
+    setUserDetails({ email: "", password: "", confirmPassword: "" });
+    toast.success("Account created successfully");
   };
 
   return (

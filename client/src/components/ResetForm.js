@@ -26,7 +26,10 @@ const ResetForm = () => {
       <h2 className="mb-1 text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
         Change Password
       </h2>
-      <form className="mt-4 space-y-4 lg:mt-5 md:space-y-5">
+      <form
+        className="mt-4 space-y-4 lg:mt-5 md:space-y-5"
+        onSubmit={handleSubmit}
+      >
         <div>
           <label
             htmlFor="newpassword"
