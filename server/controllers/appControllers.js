@@ -86,7 +86,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Implement your authentication logic here (e.g., create a JWT token)
+    //  JWT token Creatation
     const token = jwt.sign(
       {
         userId: user._id,
@@ -109,7 +109,29 @@ export const login = async (req, res) => {
 
 /** POST: http://localhost:5000/api/user/example123*/
 export const getUser = async (req, res) => {
-  res.json("Get User Route");
+  const { username } = req.params;
+
+  try {
+    if (!username) {
+      return res.status(400).json({ error: "Invalid Username" });
+    }
+
+    console.log("Username", username);
+    const user = await UserModel.findOne({ username }).exec();
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    /** remove password from user */
+    // mongoose return unnecessary data with object so convert it into json
+    const { password, ...rest } = Object.assign({}, user.toJSON());
+
+    return res.status(200).json(rest);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 /** PUT: http://localhost:5000/api/updateuser 
