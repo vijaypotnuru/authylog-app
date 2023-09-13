@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import connect from "./database/connection.js";
 import authMiddleware, { localVariables } from "./middleware/auth.js";
+import { registerMail } from "./controllers/mailer.js";
 
 // Import All Models
 import UserModel from "./model/User.model.js";
@@ -20,6 +21,7 @@ app.disable("x-powered-by");
 
 /** HTTP POST Request */
 app.post("/api/signup", controller.signup);
+app.post("/api/registerMail", registerMail);
 app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
