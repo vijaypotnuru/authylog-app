@@ -94,9 +94,10 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       {
         userId: user._id,
+        username: user.username,
         email: user.email,
       },
-      "secret",
+      "secret369852147",
       {
         expiresIn: "24h",
       }
@@ -151,13 +152,12 @@ body: {
 */
 export const updateUser = async (req, res) => {
   try {
-    const id = req.query.id;
+    const { userId } = req.user;
 
-    if (!id) {
+    if (!userId) {
       return res.status(400).json({ error: "User ID is missing" });
     }
 
-    console.log("ID", id);
     const body = req.body;
     console.log("Body", body);
 
@@ -166,9 +166,13 @@ export const updateUser = async (req, res) => {
       return res.status(400).json({ error: "No update data provided" });
     }
 
-    const updatedUser = await UserModel.findOneAndUpdate({ _id: id }, body, {
-      new: true, // Return the updated document
-    });
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: userId },
+      body,
+      {
+        new: true, // Return the updated document
+      }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
@@ -178,10 +182,7 @@ export const updateUser = async (req, res) => {
       .status(200)
       .json({ msg: "User updated successfully", user: updatedUser });
   } catch (error) {
-    console.error(error);
-    console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
-
   }
 };
 

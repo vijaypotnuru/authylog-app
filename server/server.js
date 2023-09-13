@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import connect from "./database/connection.js";
+import authMiddleware from "./middleware/auth.js";
 
 // Import All Models
 import UserModel from "./model/User.model.js";
@@ -19,7 +20,7 @@ app.disable("x-powered-by");
 
 /** HTTP POST Request */
 app.post("/api/signup", controller.signup);
-app.post("/api/login",controller.verifyUser, controller.login);
+app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
 app.get("/api/user/:username", controller.getUser);
@@ -29,7 +30,7 @@ app.get("/api/createResetSession", controller.createResetSession);
 
 /** HTTP PUT Request */
 
-app.put("/api/updateuser", controller.updateUser);
+app.put("/api/updateuser", authMiddleware, controller.updateUser);
 app.put("/api/resetPassword", controller.resetPassword);
 
 /** Start Server only when we have valid connection*/
