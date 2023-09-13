@@ -50,6 +50,10 @@ export const signup = async (req, res) => {
       username,
       password: hashedPassword,
       email,
+      firstName: "",
+      lastName: "",
+      mobileNo: "",
+      description: "",
     });
 
     await user.save();
@@ -146,7 +150,39 @@ body: {
 }
 */
 export const updateUser = async (req, res) => {
-  res.json("Update User Route");
+  try {
+    const id = req.query.id;
+
+    if (!id) {
+      return res.status(400).json({ error: "User ID is missing" });
+    }
+
+    console.log("ID", id);
+    const body = req.body;
+    console.log("Body", body);
+
+    // Check if the body contains data to update
+    if (!Object.keys(body).length) {
+      return res.status(400).json({ error: "No update data provided" });
+    }
+
+    const updatedUser = await UserModel.findOneAndUpdate({ _id: id }, body, {
+      new: true, // Return the updated document
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ msg: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    console.log(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+
+  }
 };
 
 /** GET: http://localhost:5000/api/generateOTP */
