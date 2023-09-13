@@ -16,3 +16,11 @@ const authMiddleware = async (req, res, next) => {
 };
 
 export default authMiddleware;
+
+export const localVariables = (req, res, next) => {
+  req.app.locals = {
+    OTP: null,
+    resetSession: false,
+  };
+  next();
+};

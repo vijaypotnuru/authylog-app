@@ -3,7 +3,12 @@ import React from "react";
 import UpdateProfileButton from "./UpdateProfileButton";
 
 const ProfileCard = () => {
-  
+  const { firstName, lastName } = {
+    firstName: "Vijay",
+    lastName: "Potnuru",
+    
+  };
+
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-end px-4 pt-4"></div>
@@ -20,8 +25,6 @@ const ProfileCard = () => {
           Visual Designer
         </span>
         <div className="flex mt-4 space-x-3 md:mt-6">
-          
-         
           <UpdateProfileButton />
         </div>
       </div>

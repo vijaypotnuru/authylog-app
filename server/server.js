@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import connect from "./database/connection.js";
-import authMiddleware from "./middleware/auth.js";
+import authMiddleware, { localVariables } from "./middleware/auth.js";
 
 // Import All Models
 import UserModel from "./model/User.model.js";
@@ -24,14 +24,19 @@ app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
 app.get("/api/user/:username", controller.getUser);
-app.get("/api/generateOTP", controller.generateOTP);
-app.get("/api/verifyOTP", controller.verifyOTP);
+app.get(
+  "/api/generateOTP",
+  controller.verifyUser,
+  localVariables,
+  controller.generateOTP
+);
+app.get("/api/verifyOTP", controller.verifyUser, controller.verifyOTP);
 app.get("/api/createResetSession", controller.createResetSession);
 
 /** HTTP PUT Request */
 
 app.put("/api/updateuser", authMiddleware, controller.updateUser);
-app.put("/api/resetPassword", controller.resetPassword);
+app.put("/api/resetPassword", controller.verifyUser, controller.resetPassword);
 
 /** Start Server only when we have valid connection*/
 const port = 5000;

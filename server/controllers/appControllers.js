@@ -1,6 +1,7 @@
 import UserModel from "../model/User.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import otpGenerator from "otp-generator";
 
 /** middleware to verify user*/
 export const verifyUser = async (req, res, next) => {
@@ -188,21 +189,61 @@ export const updateUser = async (req, res) => {
 
 /** GET: http://localhost:5000/api/generateOTP */
 export const generateOTP = async (req, res) => {
-  res.json("Generate OTP Route");
+  req.app.locals.OTP = otpGenerator.generate(6, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  res.status(201).send({ code: req.app.locals.OTP });
 };
 
 /** POST: http://localhost:5000/api/verifyOTP */
 export const verifyOTP = async (req, res) => {
-  res.json("Verify OTP Route");
+  const { code } = req.query;
+  if (parseInt(req.app.locals.OTP) === parseInt(code)) {
+    req.app.locals.OTP = null; // reset the OTP value
+    req.app.locals.resetSession = true; // start session for reset password
+    return res.status(201).send({ msg: "OTP verified successfully" });
+  }
+  return res.status(401).send({ error: "Invalid OTP" });
 };
 
 // successfully redict user when OTP is verified
 /** POST: http://localhost:5000/api/createResetSession */
 export const createResetSession = async (req, res) => {
-  res.json("Create Reset Session Route");
+  if (req.app.locals.resetSession) {
+    req.app.locals.resetSession = false; // allow access only once
+    return res.status(201).send({ msg: "access granted!" });
+  }
+  return res.status(441).send({ error: "Session expired!" });
 };
 
 /** POST: http://localhost:5000/api/resetPassword */
 export const resetPassword = async (req, res) => {
-  res.json("Reset Password Route");
+  try {
+    if (!req.app.locals.resetSession) {
+      return res.status(441).send({ error: "Session expired!" });
+    }
+
+    const { email, password } = req.body;
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ msg: "Password updated successfully!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
