@@ -1,4 +1,19 @@
-import UserModel from "../model/User.model";
+import UserModel from "../model/User.model.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+/** middleware to verify user*/
+export const verifyUser = async (req, res, next) => {
+  try {
+    const { email } = req.method === "GET" ? req.query : req.body;
+
+    let exist = await UserModel.findOne({ email });
+    if (!exist) return res.status(404).json({ error: "User not found!" });
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Authentication Error" });
+  }
+};
 
 /** POST: http://localhost:5000/api/signup
  * @param : {
@@ -14,54 +29,82 @@ import UserModel from "../model/User.model";
 */
 export const signup = async (req, res) => {
   try {
-    const {
-      username,
-      password,
-      email,
-      firstName,
-      lastName,
-      mobile,
-      description,
-    } = req.body;
+    const { username, password, email } = req.body;
 
     // Check if user already exists
-    const existUsername = new Promise((resolve, reject) => {
-      UserModel.findOne({ username: username }, (err, user) => {
-        if (err) reject(new Error("Error Occured"));
-        if (user) reject(new Error("Username already exists"));
-        resolve();
-      });
+    const existingUsername = await UserModel.findOne({ username });
+    const existingEmail = await UserModel.findOne({ email });
+
+    if (existingUsername) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    if (existingEmail) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new UserModel({
+      username,
+      password: hashedPassword,
+      email,
     });
 
-    // Check if email already exists
-    const existEmail = new Promise((resolve, reject) => {
-      UserModel.findOne({ email: email }, (err, email) => {
-        if (err) reject(new Error("Error Occured"));
-        if (email) reject(new Error("Email already exists"));
-        resolve();
-      });
-    });
+    await user.save();
+    console.log(user);
 
-    Promise.all([existUsername, existEmail])
-      .then(() => {})
-      .catch((error) => {
-        return res.status(400).send({
-          error: "Enable to hashed password",
-        });
-      });
+    res.status(201).json({ msg: "User registered successfully" });
   } catch (error) {
-    return res.status(500).send(error);
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while signing up" });
   }
 };
 
 /** POST: http://localhost:5000/api/login 
  * @param: {
-  "email" : "example123",
+  "email" : "example@gmail.com",
   "password" : "admin123"
 }
 */
 export const login = async (req, res) => {
-  res.json("Login Route");
+  try {
+    const { email, password } = req.body;
+
+    // Finding the user by email
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Comparing the provided password with the hashed password in the database
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    // Implement your authentication logic here (e.g., create a JWT token)
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+      },
+      "secret",
+      {
+        expiresIn: "24h",
+      }
+    );
+
+    res
+      .status(200)
+      .json({ msg: "Login successful", username: user.username, token: token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while logging in" });
+  }
 };
 
 /** POST: http://localhost:5000/api/user/example123*/

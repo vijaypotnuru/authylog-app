@@ -19,7 +19,7 @@ app.disable("x-powered-by");
 
 /** HTTP POST Request */
 app.post("/api/signup", controller.signup);
-app.post("/api/login", controller.login);
+app.post("/api/login",controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
 app.get("/api/user/:username", controller.getUser);
