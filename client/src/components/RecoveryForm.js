@@ -22,7 +22,6 @@ const RecoveryForm = () => {
     e.preventDefault();
     const { email } = recoveryOtp;
     generateOTP(email).then((OTP) => {
-      console.log("OTP:", OTP);
       if (OTP) return toast.success("OTP sent to your email");
       return toast.error("Problem while generating OTP");
     });

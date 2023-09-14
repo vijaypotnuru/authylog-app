@@ -15,7 +15,7 @@ const Profile = () => {
             src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
             alt="logo"
           />
-          Authy
+          Profile
         </a>
         <ProfileCard />
       </div>
