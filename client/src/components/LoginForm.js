@@ -24,6 +24,8 @@ const LoginForm = () => {
       navigate(`/profile/${username}`, { replace: true });
     } catch (error) {
       toast.error(error.error);
+      setUserDetails({ ...userDetails, password: "" });
+      return;
     }
 
     setUserDetails({ email: "", password: "" });

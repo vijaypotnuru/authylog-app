@@ -8,7 +8,6 @@ import RecoveryPage from "./pages/RecoveryPage";
 import Reset from "./pages/Reset";
 import PageNotFound from "./pages/PageNotFound";
 
-
 function App() {
   return (
     <Routes>

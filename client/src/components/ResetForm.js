@@ -16,7 +16,6 @@ const ResetForm = () => {
     const resetSession = async () => {
       try {
         const { data } = await createResetSession();
-        console.log(data);
         if (data.flag) {
           // session started
           return toast.success("Reset Session started successfully");

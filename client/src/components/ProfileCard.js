@@ -9,8 +9,6 @@ const ProfileCard = () => {
   const navigate = useNavigate();
   const { username } = useParams();
 
-
-
   const [userDetails, setUserDetails] = useState({
     username,
     email: "",
@@ -22,13 +20,12 @@ const ProfileCard = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-
         const token = localStorage.getItem("token");
 
         if (!token) {
           navigate("/login", { replace: true });
           return;
-        }else{
+        } else {
           const decodedToken = jwt_decode(token);
           if (decodedToken.username !== username) {
             navigate("/", { replace: true });
@@ -65,8 +62,7 @@ const ProfileCard = () => {
 
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-      <div className="flex justify-end px-4 pt-4"></div>
-      <div className="flex flex-col items-center pb-10">
+      <div className="flex flex-col items-center pb-10 py-10">
         <img
           className="w-24 h-24 mb-3 rounded-full shadow-lg"
           src="https://res.cloudinary.com/dmlhm8dwi/image/upload/v1693023269/PngItem_1468281_tcmtx2.png"
@@ -85,7 +81,9 @@ const ProfileCard = () => {
           Mobile No: {userDetails.mobileNo}
         </p>
         <p className="text-md text-gray-500 dark:text-gray-400">
-          Description: {userDetails.description}
+          Description:
+          <br />
+          {userDetails.description}
         </p>
         <div className="flex mt-4 space-x-3 md:mt-6">
           <UpdateProfileButton userDetails={userDetails} />

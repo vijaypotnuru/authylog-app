@@ -21,11 +21,20 @@ const RecoveryForm = () => {
   const emailSubmit = (e) => {
     e.preventDefault();
     const { email } = recoveryOtp;
-    generateOTP(email).then((OTP) => {
-      if (OTP) return toast.success("OTP sent to your email");
-      return toast.error("Problem while generating OTP");
-    });
-    setRecoveryOTP({ ...recoveryOtp, otpSent: true });
+    generateOTP(email)
+      .then((OTP) => {
+        if (OTP) {
+          toast.success("OTP sent to your email");
+          setRecoveryOTP({ ...recoveryOtp, otpSent: true });
+          return;
+        }
+        toast.error("Problem while generating OTP");
+      })
+      .catch((error) => {
+        toast.error("User not found! ");
+
+        setRecoveryOTP({ ...recoveryOtp, otpSent: false });
+      });
   };
 
   const otpSubmit = async (e) => {
@@ -143,12 +152,12 @@ const RecoveryForm = () => {
           </button>
           <p className="text-sm font-light text-gray-500 dark:text-gray-400">
             Don’t have an account yet?{" "}
-            <a
-              href="signup"
+            <Link
+              to="/signup"
               className="font-medium text-blue-600 hover:underline dark:text-blue-500"
             >
               Sign up
-            </a>
+            </Link>
           </p>
         </form>
       </div>
