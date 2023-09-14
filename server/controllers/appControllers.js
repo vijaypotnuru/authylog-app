@@ -60,7 +60,7 @@ export const signup = async (req, res) => {
     await user.save();
     console.log(user);
 
-    res.status(201).json({ msg: "User registered successfully" });
+    res.status(200).json({ msg: "User registered successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while signing up" });
@@ -104,9 +104,12 @@ export const login = async (req, res) => {
       }
     );
 
-    res
-      .status(200)
-      .json({ msg: "Login successful", username: user.username, token: token });
+    res.status(200).json({
+      msg: "Login successful",
+      userId: user._id,
+      username: user.username,
+      token: token,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while logging in" });
@@ -124,6 +127,34 @@ export const getUser = async (req, res) => {
 
     console.log("Username", username);
     const user = await UserModel.findOne({ username }).exec();
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    /** remove password from user */
+    // mongoose return unnecessary data with object so convert it into json
+    const { password, ...rest } = Object.assign({}, user.toJSON());
+
+    return res.status(200).json(rest);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+/** POST: http://localhost:5000/api/userbymail/example@gmail.com*/
+
+export const getUserByMail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+
+    console.log("email", email);
+    const user = await UserModel.findOne({ email }).exec();
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -213,10 +244,9 @@ export const verifyOTP = async (req, res) => {
 /** POST: http://localhost:5000/api/createResetSession */
 export const createResetSession = async (req, res) => {
   if (req.app.locals.resetSession) {
-    req.app.locals.resetSession = false; // allow access only once
-    return res.status(201).send({ msg: "access granted!" });
+    return res.status(201).send({ flag: req.app.locals.resetSession });
   }
-  return res.status(441).send({ error: "Session expired!" });
+  return res.status(440).send({ error: "Session expired!" });
 };
 
 /** POST: http://localhost:5000/api/resetPassword */
@@ -240,6 +270,7 @@ export const resetPassword = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
+    req.app.locals.resetSession = false; // reset the resetSession flag
 
     return res.status(200).json({ msg: "Password updated successfully!" });
   } catch (error) {

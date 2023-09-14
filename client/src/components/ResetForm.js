@@ -1,23 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate, useParams } from "react-router-dom";
+import { resetPassword, createResetSession } from "../helper/helper";
 
 const ResetForm = () => {
-  const [resetPassword, setResetPassword] = useState({
+  const [resetPass, setresetPass] = useState({
     newPassword: "",
     confirmPassword: "",
     showPassword: false,
   });
+  const { email } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const resetSession = async () => {
+      try {
+        const { data } = await createResetSession();
+        console.log(data);
+        if (data.flag) {
+          // session started
+          return toast.success("Reset Session started successfully");
+        }
+      } catch (error) {
+        toast.error("Session expired!");
+        return navigate("/recovery");
+      }
+    };
+
+    resetSession();
+  }, [navigate]);
+
+  console.log(email);
 
   const handleInputChange = (e) => {
-    setResetPassword({ ...resetPassword, [e.target.name]: e.target.value });
-    console.log(resetPassword);
+    setresetPass({ ...resetPass, [e.target.name]: e.target.value });
+    console.log(resetPass);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(resetPassword);
-    setResetPassword({ newPassword: "", confirmPassword: "" });
-    toast.success("Password reset successful");
+    if (resetPass.newPassword !== resetPass.confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    let resetPromise = resetPassword({
+      email,
+      password: resetPass.newPassword,
+    });
+    toast.promise(resetPromise, {
+      loading: "Resetting Password...",
+      success: <b>Password Reset Successfully</b>,
+      error: <b>Problem while resetting password</b>,
+    });
+    navigate("/", { replace: true });
   };
 
   return (
@@ -39,10 +74,10 @@ const ResetForm = () => {
           </label>
           <input
             onChange={handleInputChange}
-            type="password"
+            type={resetPass.showPassword ? "text" : "password"}
             name="newPassword"
             id="password"
-            value={resetPassword.newPassword}
+            value={resetPass.newPassword}
             placeholder="••••••••"
             className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
@@ -57,10 +92,10 @@ const ResetForm = () => {
           </label>
           <input
             onChange={handleInputChange}
-            type="confirm-password"
+            type="text"
             name="confirmPassword"
             id="confirm-password"
-            value={resetPassword.confirmPassword}
+            value={resetPass.confirmPassword}
             placeholder="••••••••"
             className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
@@ -69,25 +104,29 @@ const ResetForm = () => {
         <div className="flex items-start">
           <div className="flex items-center h-5">
             <input
+              onChange={() =>
+                setresetPass({
+                  ...resetPass,
+                  showPassword: !resetPass.showPassword,
+                })
+              }
               id="newsletter"
               aria-describedby="newsletter"
               type="checkbox"
               className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-              required
             />
           </div>
           <div className="ml-3 text-sm">
             <label
-              for="newsletter"
+              htmlFor="newsletter"
               className="font-light text-gray-500 dark:text-gray-300"
             >
-              I accept the{" "}
-              <a
+              <span
                 className="font-medium text-blue-600 hover:underline dark:text-blue-500"
                 href="/"
               >
-                Terms and Conditions
-              </a>
+                Show Password
+              </span>
             </label>
           </div>
         </div>

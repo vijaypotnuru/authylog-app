@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import {Link} from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
+import { signup } from "../helper/helper";
 
 const SignUpFom = () => {
   const [userDetails, setUserDetails] = useState({
@@ -8,7 +9,9 @@ const SignUpFom = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    isCheck: false,
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
@@ -17,13 +20,31 @@ const SignUpFom = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(userDetails);
+
+    if (userDetails.password !== userDetails.confirmPassword) {
+      toast.error("Password doesn't match...!");
+      return;
+    }
+    const { username, email, password } = userDetails;
+    const newUser = { username, email, password };
+
+    let signupPromise = signup(newUser);
+    toast.promise(signupPromise, {
+      loading: "Creating an account...",
+      success: <b>Account created successfully...!</b>,
+      error: <b>Couldn't create an account...!</b>,
+    });
+
+    signupPromise.then(function () {
+      navigate("/");
+    });
     setUserDetails({
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
+      isCheck: false,
     });
-    toast.success("Account created successfully");
   };
 
   return (
@@ -46,6 +67,7 @@ const SignUpFom = () => {
               type="text"
               name="username"
               id="username"
+              value={userDetails.username}
               className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Ex : vijay2000"
               required
@@ -63,6 +85,7 @@ const SignUpFom = () => {
               type="email"
               name="email"
               id="email"
+              value={userDetails.email}
               className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="name@gmail.com"
               required
@@ -80,6 +103,7 @@ const SignUpFom = () => {
               type="password"
               name="password"
               id="password"
+              value={userDetails.password}
               placeholder="••••••••"
               className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               required
@@ -87,7 +111,7 @@ const SignUpFom = () => {
           </div>
           <div>
             <label
-              htmlFor="confirm-password"
+              htmlFor="confirmPassword"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
               Confirm password
@@ -96,7 +120,8 @@ const SignUpFom = () => {
               onChange={handleChange}
               type="confirm-password"
               name="confirmPassword"
-              id="confirm-password"
+              id="confirmPassword"
+              value={userDetails.confirmPassword}
               placeholder="••••••••"
               className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               required
@@ -110,11 +135,18 @@ const SignUpFom = () => {
                 type="checkbox"
                 className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
                 required
+                onChange={() =>
+                  setUserDetails({
+                    ...userDetails,
+                    isCheck: !userDetails.isCheck,
+                  })
+                }
+                checked={userDetails.isCheck}
               />
             </div>
             <div className="ml-3 text-sm">
               <label
-                for="terms"
+                htmlFor="terms"
                 className="font-light text-gray-500 dark:text-gray-300"
               >
                 I accept the{" "}
@@ -136,7 +168,7 @@ const SignUpFom = () => {
           <p className="text-sm font-light text-gray-500 dark:text-gray-400">
             Already have an account?{" "}
             <Link
-              to='/'
+              to="/"
               className="font-medium text-blue-600 hover:underline dark:text-blue-500"
             >
               Login here

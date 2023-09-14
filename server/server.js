@@ -26,6 +26,7 @@ app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
 app.get("/api/user/:username", controller.getUser);
+app.get("/api/userbymail/:email", controller.getUserByMail);
 app.get(
   "/api/generateOTP",
   controller.verifyUser,
@@ -41,13 +42,13 @@ app.put("/api/updateuser", authMiddleware, controller.updateUser);
 app.put("/api/resetPassword", controller.verifyUser, controller.resetPassword);
 
 /** Start Server only when we have valid connection*/
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 connect()
   .then(() => {
     try {
       app.listen(port, () => {
-        console.log(`Server is running on port http://localhost:${port}`);
+        console.log(`Server is running at port ${port}`);
       });
     } catch (error) {
       console.log("Error connecting to the database", error);

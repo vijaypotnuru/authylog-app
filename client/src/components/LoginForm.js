@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import { login } from "../helper/helper";
 
 const LoginForm = () => {
   const [userDetails, setUserDetails] = useState({ email: "", password: "" });
@@ -8,11 +9,24 @@ const LoginForm = () => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(userDetails);
+
+    try {
+      const response = await login(userDetails);
+
+      const { msg, token, username } = response.data;
+      toast.success(msg);
+      localStorage.setItem("token", token);
+
+      navigate(`/profile/${username}`, { replace: true });
+    } catch (error) {
+      toast.error(error.error);
+    }
+
     setUserDetails({ email: "", password: "" });
-    toast.success("Login successful");
   };
 
   return (
@@ -60,28 +74,9 @@ const LoginForm = () => {
             />
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="remember"
-                  aria-describedby="remember"
-                  type="checkbox"
-                  className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
-                  required=""
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label
-                  htmlFor="remember"
-                  className="text-gray-500 dark:text-gray-300"
-                >
-                  Remember me
-                </label>
-              </div>
-            </div>
             <Link
               to="/recovery"
-              className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
+              className="ml-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
             >
               Forgot password?
             </Link>

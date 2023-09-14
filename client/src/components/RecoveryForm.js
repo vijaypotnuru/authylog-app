@@ -1,48 +1,82 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import { generateOTP, verifyOTP } from "../helper/helper";
 
 import { BsFillArrowRightCircleFill } from "react-icons/bs";
 
 const RecoveryForm = () => {
-  const [userDetails, setUserDetails] = useState({
+  const [recoveryOtp, setRecoveryOTP] = useState({
     email: "",
     otp: "",
     otpSent: false,
   });
 
-  console.log(userDetails.otpSent);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+    setRecoveryOTP({ ...recoveryOtp, [e.target.name]: e.target.value });
   };
 
   const emailSubmit = (e) => {
     e.preventDefault();
-    console.log(userDetails);
-    setUserDetails({ email: "", otp: "" });
-    toast.success("OTP sent to your email");
-    setUserDetails({ ...userDetails, otpSent: true });
+    const { email } = recoveryOtp;
+    generateOTP(email).then((OTP) => {
+      console.log("OTP:", OTP);
+      if (OTP) return toast.success("OTP sent to your email");
+      return toast.error("Problem while generating OTP");
+    });
+    setRecoveryOTP({ ...recoveryOtp, otpSent: true });
   };
 
-  const otpSubmit = (e) => {
+  const otpSubmit = async (e) => {
     e.preventDefault();
-    console.log(userDetails.otp);
+
+    try {
+      const { status } = await verifyOTP({
+        email: recoveryOtp.email,
+        code: recoveryOtp.otp,
+      });
+
+      if (status === 201) {
+        toast.success("OTP verified successfully");
+        navigate(`/reset/${recoveryOtp.email}`, { replace: true });
+      } else {
+        toast.error("Wrong OTP! Check your email again");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("Wrong OTP");
+    }
   };
 
-  const formSubmit = userDetails.otpSent ? otpSubmit : emailSubmit;
+  const resendOTP = async () => {
+    const { email } = recoveryOtp;
+
+    let sendPromise = generateOTP(email);
+    toast.promise(sendPromise, {
+      loading: "Sending OTP...",
+      success: <b>OTP sent successfully</b>,
+      error: <b>Problem while sending OTP</b>,
+    });
+    sendPromise.then((OTP) => {
+      console.log("OTP:", OTP);
+    });
+  };
+
+  const formSubmit = recoveryOtp.otpSent ? otpSubmit : emailSubmit;
 
   return (
     <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
         <h1 className="text-center text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-          {userDetails.otpSent
+          {recoveryOtp.otpSent
             ? "Enter OTP sent to your email"
             : "Enter your email"}
         </h1>
         <form className="space-y-4 md:space-y-6" onSubmit={formSubmit}>
-          {userDetails.otpSent ? (
+          {recoveryOtp.otpSent ? (
             <div>
               <label
                 htmlFor="otp"
@@ -55,7 +89,7 @@ const RecoveryForm = () => {
                 type="password"
                 name="otp"
                 id="otp"
-                value={userDetails.otp}
+                value={recoveryOtp.otp}
                 placeholder="••••••••"
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
@@ -74,22 +108,23 @@ const RecoveryForm = () => {
                 type="email"
                 name="email"
                 id="email"
-                value={userDetails.email}
+                value={recoveryOtp.email}
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="name@gmail.com"
                 required
               />
             </div>
           )}
-          {userDetails.otpSent && (
+          {recoveryOtp.otpSent && (
             <div className="flex items-center justify-between">
               <div className="flex items-start"></div>
 
               <Link
+                onClick={resendOTP}
                 to="/recovery"
                 className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
               >
-                Can't get OTP?
+                Resend OTP?
               </Link>
             </div>
           )}
@@ -98,7 +133,7 @@ const RecoveryForm = () => {
             type="submit"
             className="w-full text-xl flex justify-center items-center text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
-            {userDetails.otpSent ? (
+            {recoveryOtp.otpSent ? (
               "Submit OTP"
             ) : (
               <>

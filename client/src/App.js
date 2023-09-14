@@ -8,14 +8,15 @@ import RecoveryPage from "./pages/RecoveryPage";
 import Reset from "./pages/Reset";
 import PageNotFound from "./pages/PageNotFound";
 
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/profile/:id" element={<Profile />} />
+      <Route path="/profile/:username" element={<Profile />} />
       <Route path="/recovery" element={<RecoveryPage />} />
-      <Route path="/reset" element={<Reset />} />
+      <Route path="/reset/:email" element={<Reset />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

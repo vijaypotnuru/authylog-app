@@ -5,9 +5,7 @@ import ENV from "../config.js";
 
 // https://ethereal.email/create
 let nodeConfig = {
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  service: "gmail",
   auth: {
     user: ENV.EMAIL, // generated ethereal user
     pass: ENV.PASSWORD, // generated ethereal password
@@ -40,8 +38,7 @@ export const registerMail = async (req, res) => {
     body: {
       name: username,
       intro:
-        text ||
-        "Welcome to Authy! We're very excited to have you on board.",
+        text || "Welcome to Authy! We're very excited to have you on board.",
       outro:
         "Need help, or have questions? Just reply to this email, we'd love to help.",
     },
