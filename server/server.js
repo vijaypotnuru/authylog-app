@@ -27,6 +27,7 @@ app.disable("x-powered-by");
 /** HTTP POST Request */
 app.post("/api/signup", controller.signup);
 app.post("/api/registerMail", registerMail);
+app.options("/api/login", cors());
 app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
