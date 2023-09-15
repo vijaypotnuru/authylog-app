@@ -15,7 +15,12 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Update this to your frontend's actual origin
+    credentials: true, // Allow credentials (cookies) to be sent with the request if needed
+  })
+);
 app.use(morgan("dev"));
 app.disable("x-powered-by");
 
