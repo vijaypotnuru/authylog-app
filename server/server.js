@@ -15,13 +15,21 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+// Configure CORS to allow requests from 'https://authylog.netlify.app'
+app.use(
+  cors({
+    origin: "https://authylog.netlify.app",
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 app.disable("x-powered-by");
 
 /** HTTP POST Request */
 app.post("/api/signup", controller.signup);
 app.post("/api/registerMail", registerMail);
+// Handle OPTIONS request for the login endpoint to allow CORS
+app.options("/api/login", cors());
 app.post("/api/login", controller.verifyUser, controller.login);
 
 /** HTTP GET Request */
