@@ -5,10 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
-  },
-  "engines": {
-    "node": "14.20.1"
+    "start": "server.js"
   },
   "keywords": [],
   "author": "",
