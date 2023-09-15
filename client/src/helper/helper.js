@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "https://ill-tan-cricket-wear.cyclic.cloud/";
+axios.defaults.baseURL = "https://ill-tan-cricket-wear.cyclic.cloud";
 
 /**Make API Request */
 
